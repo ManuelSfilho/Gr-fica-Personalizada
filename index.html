@@ -1173,55 +1173,55 @@ function seedDados() {
 
   // seu código atual aqui...
 
+// ================================
+// BLOQUEIO DO BOTÃO VOLTAR PWA
+// ================================
+
 let ultimoVoltar = 0;
 
-// cria estado inicial
-history.pushState({pagina:"home"}, "");
+// empilha vários estados
+for(let i=0;i<10;i++){
+  history.pushState({pagina:"home"}, "", location.href);
+}
 
-// Android Back Button
-window.addEventListener("popstate", function () {
+function tratarVoltar(){
 
-  // fecha modal detalhe
-  if (document.getElementById("modalDetalhe").classList.contains("open")) {
-
+  // fecha detalhe
+  if(document.getElementById("modalDetalhe").classList.contains("open")){
     fecharModal("modalDetalhe");
-
-    history.pushState({pagina:"home"}, "");
-
+    history.pushState({pagina:"home"}, "", location.href);
     return;
   }
 
-  // fecha modal formulário
-  if (document.getElementById("modalForm").classList.contains("open")) {
-
+  // fecha formulário
+  if(document.getElementById("modalForm").classList.contains("open")){
     fecharModal("modalForm");
-
-    history.pushState({pagina:"home"}, "");
-
+    history.pushState({pagina:"home"}, "", location.href);
     return;
   }
 
-  // HOME
   const agora = Date.now();
 
-  if (agora - ultimoVoltar < 2000) {
+  if(agora - ultimoVoltar < 2000){
 
-    // Android PWA
-    if (navigator.app && navigator.app.exitApp) {
-      navigator.app.exitApp();
-    } else {
-      window.close();
-    }
+    // permite sair na segunda vez
+    return;
 
-  } else {
+  }else{
 
     ultimoVoltar = agora;
 
     toast("Pressione voltar novamente para sair");
 
-    history.pushState({pagina:"home"}, "");
+    history.pushState({pagina:"home"}, "", location.href);
   }
+}
 
+window.addEventListener("popstate", tratarVoltar);
+
+// garante histórico ao voltar para a página
+window.addEventListener("pageshow", ()=>{
+  history.pushState({pagina:"home"}, "", location.href);
 });
 
 </script>
