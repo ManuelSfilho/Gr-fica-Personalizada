@@ -977,6 +977,7 @@ function abrirModalNovo() {
   document.getElementById('fDataEntrega').value = '';
   selecionarStatus('novo');
   document.getElementById('modalForm').classList.add('open');
+  history.pushState({pagina:"form"}, "");
 }
 
 function abrirModalEditar(id) {
@@ -1101,6 +1102,8 @@ function abrirDetalhe(id) {
     </div>
   `;
   document.getElementById('modalDetalhe').classList.add('open');
+
+  history.pushState({pagina:"detalhe"}, "");
 }
 
 function avancarStatus(id) {
@@ -1164,64 +1167,61 @@ function seedDados() {
   renderLista();
 })();
 
-// ===== CONTROLE DO BOTÃO VOLTAR =====
 
-// Cria estado inicial
-history.pushState({pagina: "home"}, "");
 
-// Quando abrir modal de novo pedido
-function abrirModalNovo() {
-  document.getElementById('modalFormTitulo').textContent = 'Novo Pedido';
-  document.getElementById('editId').value = '';
-  document.getElementById('fCliente').value = '';
-  document.getElementById('fServico').value = '';
-  document.getElementById('fQtd').value = '';
-  document.getElementById('fValor').value = '';
-  document.getElementById('fContato').value = '';
-  document.getElementById('fObs').value = '';
 
-  const hoje = new Date().toISOString().split('T')[0];
-  document.getElementById('fDataPedido').value = hoje;
-  document.getElementById('fDataEntrega').value = '';
-
-  selecionarStatus('novo');
-
-  document.getElementById('modalForm').classList.add('open');
-
-  history.pushState({pagina:"form"}, "");
-}
-
-// Quando abrir detalhes
-function abrirDetalhe(id) {
-  const p = pedidos.find(x => x.id === id);
-  if (!p) return;
 
   // seu código atual aqui...
 
-  document.getElementById('modalDetalhe').classList.add('open');
+let ultimoVoltar = 0;
 
-  history.pushState({pagina:"detalhe"}, "");
-}
+// cria estado inicial
+history.pushState({pagina:"home"}, "");
 
-// Intercepta botão voltar
-window.addEventListener('popstate', function () {
+// Android Back Button
+window.addEventListener("popstate", function () {
 
-  // Fecha modal de detalhe primeiro
-  if (document.getElementById('modalDetalhe').classList.contains('open')) {
-    fecharModal('modalDetalhe');
+  // fecha modal detalhe
+  if (document.getElementById("modalDetalhe").classList.contains("open")) {
+
+    fecharModal("modalDetalhe");
+
     history.pushState({pagina:"home"}, "");
+
     return;
   }
 
-  // Fecha modal de formulário
-  if (document.getElementById('modalForm').classList.contains('open')) {
-    fecharModal('modalForm');
+  // fecha modal formulário
+  if (document.getElementById("modalForm").classList.contains("open")) {
+
+    fecharModal("modalForm");
+
     history.pushState({pagina:"home"}, "");
+
     return;
   }
 
-  // Se estiver na Home não sai do app
-  history.pushState({pagina:"home"}, "");
+  // HOME
+  const agora = Date.now();
+
+  if (agora - ultimoVoltar < 2000) {
+
+    // Android PWA
+    if (navigator.app && navigator.app.exitApp) {
+      navigator.app.exitApp();
+    } else {
+      window.close();
+    }
+
+  } else {
+
+    ultimoVoltar = agora;
+
+    toast("Pressione voltar novamente para sair");
+
+    history.pushState({pagina:"home"}, "");
+  }
+
 });
 
 </script>
