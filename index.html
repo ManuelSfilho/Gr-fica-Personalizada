@@ -1158,6 +1158,66 @@ function seedDados() {
   renderLista();
 })();
 
+// ===== CONTROLE DO BOTÃO VOLTAR =====
+
+// Cria estado inicial
+history.pushState({pagina: "home"}, "");
+
+// Quando abrir modal de novo pedido
+function abrirModalNovo() {
+  document.getElementById('modalFormTitulo').textContent = 'Novo Pedido';
+  document.getElementById('editId').value = '';
+  document.getElementById('fCliente').value = '';
+  document.getElementById('fServico').value = '';
+  document.getElementById('fQtd').value = '';
+  document.getElementById('fValor').value = '';
+  document.getElementById('fContato').value = '';
+  document.getElementById('fObs').value = '';
+
+  const hoje = new Date().toISOString().split('T')[0];
+  document.getElementById('fDataPedido').value = hoje;
+  document.getElementById('fDataEntrega').value = '';
+
+  selecionarStatus('novo');
+
+  document.getElementById('modalForm').classList.add('open');
+
+  history.pushState({pagina:"form"}, "");
+}
+
+// Quando abrir detalhes
+function abrirDetalhe(id) {
+  const p = pedidos.find(x => x.id === id);
+  if (!p) return;
+
+  // seu código atual aqui...
+
+  document.getElementById('modalDetalhe').classList.add('open');
+
+  history.pushState({pagina:"detalhe"}, "");
+}
+
+// Intercepta botão voltar
+window.addEventListener('popstate', function () {
+
+  // Fecha modal de detalhe primeiro
+  if (document.getElementById('modalDetalhe').classList.contains('open')) {
+    fecharModal('modalDetalhe');
+    history.pushState({pagina:"home"}, "");
+    return;
+  }
+
+  // Fecha modal de formulário
+  if (document.getElementById('modalForm').classList.contains('open')) {
+    fecharModal('modalForm');
+    history.pushState({pagina:"home"}, "");
+    return;
+  }
+
+  // Se estiver na Home não sai do app
+  history.pushState({pagina:"home"}, "");
+});
+
 </script>
 </body>
 </html>
