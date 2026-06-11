@@ -733,12 +733,57 @@ const STATUS_ORDER = ['novo', 'producao', 'finalizado', 'entregue'];
 const STATUS_LABEL = { novo: 'Novo', producao: 'Em Produção', finalizado: 'Finalizado', entregue: 'Entregue' };
 const STATUS_NEXT_LABEL = { novo: '▶ Mover p/ Em Produção', producao: '▶ Mover p/ Finalizado', finalizado: '▶ Mover p/ Entregue', entregue: null };
 
-let pedidos = JSON.parse(localStorage.getItem('grafica_pedidos') || '[]');
+
+let pedidos = [];
+let db;
+
+function iniciarBanco(){
+  return new Promise((resolve,reject)=>{
+    const req = indexedDB.open('grafica_pedidos_db',1);
+
+    req.onupgradeneeded = function(e){
+      db = e.target.result;
+      if(!db.objectStoreNames.contains('pedidos')){
+        db.createObjectStore('pedidos',{keyPath:'id'});
+      }
+    };
+
+    req.onsuccess = function(e){
+      db = e.target.result;
+      resolve();
+    };
+
+    req.onerror = reject;
+  });
+}
+
+async function carregarPedidosDB(){
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction('pedidos','readonly');
+    const store = tx.objectStore('pedidos');
+    const req = store.getAll();
+
+    req.onsuccess = ()=>{
+      pedidos = req.result || [];
+      resolve();
+    };
+
+    req.onerror = reject;
+  });
+}
+
 let filtroStatus = 'all';
 let statusSelecionado = 'novo';
 
 function salvar() {
-  localStorage.setItem('grafica_pedidos', JSON.stringify(pedidos));
+  if(!db) return;
+
+  const tx = db.transaction('pedidos','readwrite');
+  const store = tx.objectStore('pedidos');
+
+  store.clear();
+
+  pedidos.forEach(p=>store.put(p));
 }
 
 function gerarId() {
@@ -1086,10 +1131,20 @@ function seedDados() {
   salvar();
 }
 
-seedDados();
-renderStats();
-renderDashboard();
-renderLista();
+
+(async()=>{
+  await iniciarBanco();
+  await carregarPedidosDB();
+
+  if(pedidos.length===0){
+    seedDados();
+  }
+
+  renderStats();
+  renderDashboard();
+  renderLista();
+})();
+
 </script>
 </body>
 </html>
