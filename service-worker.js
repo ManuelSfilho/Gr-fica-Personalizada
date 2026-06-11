@@ -1,4 +1,4 @@
-const CACHE = "grafica-personalizada-v1";
+const CACHE = "grafica-personalizada-v2";
 
 const ARQUIVOS = [
   "./",
